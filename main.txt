@@ -58,6 +58,7 @@ Sub create_sheets()
     Call modifyTitle(Worksheets(i))
     Call setBorders(Worksheets(i))
     Call freezePane(Worksheets(i))
+    Call setButtons(Worksheets(i))
     
 del_continue:
     Next i
@@ -69,6 +70,43 @@ del_continue:
     ActiveWorkbook.Save
 
 End Sub
+
+Function setButtons(ByVal ws As Worksheet)
+
+    With ws.Buttons.Add(Range("M2").Left, _
+        Range("M2").Top, _
+        Range("M2:O2").width, _
+        Range("M2").Height)
+        .OnAction = "cellHidden"
+        .Characters.Text = "計画の表示/非表示"
+    End With
+
+    With ws.Buttons.Add(Range("Q2").Left, _
+        Range("Q2").Top, _
+        Range("Q2:S2").width, _
+        Range("Q2").Height)
+        .OnAction = "nameCopy"
+        .Characters.Text = "先月の氏名をコピー"
+    End With
+    
+    With ws.Buttons.Add(Range("U2").Left, _
+        Range("U2").Top, _
+        Range("U2:V2").width, _
+        Range("U2").Height)
+        .OnAction = "paint"
+        .Characters.Text = "反映"
+    End With
+    
+    With ws.Buttons.Add(Range("X2").Left, _
+        Range("X2").Top, _
+        Range("X2:Y2").width, _
+        Range("X2").Height)
+        .OnAction = "print_preview"
+        .Characters.Text = "印刷"
+    End With
+
+
+End Function
 
 Function setHyperLinks()
 
