@@ -9,10 +9,22 @@ Sub create_sheets()
     Dim i As Integer
     Dim require_sheets As Integer
     
+    Dim worksheets_count As Integer
+    
     y_offset = 4
     x_offset = 2
 
     ninzu = 50
+    
+    Application.DisplayAlerts = False
+    
+    Do While Worksheets.Count > 1
+        If Worksheets(Worksheets.Count).Name <> "初期設定" Then
+            Worksheets(Worksheets.Count).Delete
+        End If
+    Loop
+    
+    Application.DisplayAlerts = True
 
     require_sheets = Worksheets("初期設定").Range("c7") * 12 + 1
     
@@ -31,7 +43,7 @@ Sub create_sheets()
     For i = 2 To Worksheets.Count Step 1
     
     If Worksheets(i).Name = "初期設定" Then
-        GoTo continue
+        GoTo del_continue
     End If
     
     Call cellClear(Worksheets(i))
@@ -47,7 +59,7 @@ Sub create_sheets()
     Call setBorders(Worksheets(i))
     Call freezePane(Worksheets(i))
     
-continue:
+del_continue:
     Next i
     
     Call setHyperLinks
@@ -62,16 +74,16 @@ Function setHyperLinks()
 
     Dim i As Integer
     
-    Worksheets("初期設定").Range("B11") = "シートリンク"
+    Worksheets("初期設定").Columns("H").Delete
     
-For i = 2 To Worksheets.Count
-    Worksheets("初期設定").Range("B" & i + 10).Hyperlinks.Delete
-    Worksheets("初期設定").Range("B" & i + 10) = ""
-    ActiveSheet.Hyperlinks.Add Anchor:=Worksheets("初期設定").Range("B" & i + 10), _
-    Address:="", _
-    SubAddress:=Worksheets(i).Name & "!A1", _
-    TextToDisplay:=Worksheets(i).Name
-Next
+    Worksheets("初期設定").Range("H3") = "シートリンク"
+    
+    For i = 2 To Worksheets.Count
+        ActiveSheet.Hyperlinks.Add Anchor:=Worksheets("初期設定").Range("H" & i + 2), _
+        Address:="", _
+        SubAddress:=Worksheets(i).Name & "!A1", _
+        TextToDisplay:=Worksheets(i).Name
+    Next
 
 End Function
 
