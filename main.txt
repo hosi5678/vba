@@ -1,0 +1,467 @@
+Option Explicit
+Option Base 1
+Public y_offset As Integer
+Public x_offset As Integer
+Public ninzu As Integer
+
+Sub create_sheets()
+
+    Dim i As Integer
+    Dim require_sheets As Integer
+    
+    y_offset = 4
+    x_offset = 2
+
+    ninzu = 50
+
+    require_sheets = Worksheets("初期設定").Range("c7") * 12 + 1
+    
+    If Worksheets.Count = 1 Then
+        Worksheets.Add after:=Worksheets(Worksheets.Count)
+    End If
+        
+'        Worksheets(2).Name = "Sheet2"
+        
+    While Worksheets.Count < require_sheets
+        Worksheets(2).Copy after:=Worksheets(Worksheets.Count)
+    Wend
+    
+    Call setSheetName
+    
+    For i = 2 To Worksheets.Count Step 1
+    
+    If Worksheets(i).Name = "初期設定" Then
+        GoTo continue
+    End If
+    
+    Call cellClear(Worksheets(i))
+ 
+    Call setGappi(Worksheets(i))
+    Call setTitle(Worksheets(i))
+    Call setYoubi(Worksheets(i))
+    Call setNo(Worksheets(i))
+    Call setYoubiConditions(Worksheets(i))
+    Call setBikouConditions(Worksheets(i))
+    Call setCalender(Worksheets(i))
+    Call modifyTitle(Worksheets(i))
+    Call setBorders(Worksheets(i))
+    Call freezePane(Worksheets(i))
+    
+continue:
+    Next i
+    
+    Call setHyperLinks
+    
+    Worksheets("初期設定").Select
+    
+    ActiveWorkbook.Save
+
+End Sub
+
+Function setHyperLinks()
+
+    Dim i As Integer
+    
+    Worksheets("初期設定").Range("B11") = "シートリンク"
+    
+For i = 2 To Worksheets.Count
+    Worksheets("初期設定").Range("B" & i + 10).Hyperlinks.Delete
+    Worksheets("初期設定").Range("B" & i + 10) = ""
+    ActiveSheet.Hyperlinks.Add Anchor:=Worksheets("初期設定").Range("B" & i + 10), _
+    Address:="", _
+    SubAddress:=Worksheets(i).Name & "!A1", _
+    TextToDisplay:=Worksheets(i).Name
+Next
+
+End Function
+
+
+Function modifyTitle(ByVal ws As Worksheet)
+
+    ws.Cells(y_offset, x_offset) = ws.Cells(y_offset, x_offset) & "年"
+    ws.Cells(y_offset, x_offset + 1) = ws.Cells(y_offset, x_offset + 1) & "月"
+
+End Function
+
+Function setSheetName()
+    
+    Dim i As Integer
+       
+    For i = 2 To Worksheets.Count Step 1
+        Worksheets(i).Name = i
+    Next i
+    
+    Dim t, n As Integer ' t:月 n:年
+    
+    n = Worksheets(1).Range("c4")
+    t = Worksheets(1).Range("c5")
+
+    For i = 2 To Worksheets.Count Step 1
+    
+        If Worksheets(i).Name = "初期設定" Then
+            GoTo continue
+        End If
+        
+        If t > 12 Then
+            t = t - 12
+            n = n + 1
+        End If
+           
+        Worksheets(i).Name = n & Format(t, "00")
+         
+        t = t + 1
+        
+continue:
+    Next i
+
+End Function
+
+Function setTitle(ByVal ws As Worksheet)
+        
+    ws.Cells(y_offset, x_offset + 2) = "出席管理票"
+    ws.Range(ws.Cells(y_offset + 1, x_offset + 2), ws.Cells(y_offset + 1, x_offset + 3)).Merge
+    ws.Cells(y_offset + 2, x_offset + 1) = "氏名"
+    ws.Cells(y_offset + 2, x_offset + 2) = "備考/コメント"
+    ws.Range(ws.Cells(y_offset + 2, x_offset + 2), ws.Cells(y_offset + 2, x_offset + 3)).Merge
+    ws.Cells(y_offset + 2, x_offset) = "No."
+    ws.Range(ws.Cells(y_offset, x_offset + 2), ws.Cells(y_offset, x_offset + 3)).Merge
+
+End Function
+
+Function setBorders(ByVal ws As Worksheet)
+
+    Dim border_top As Variant
+    Dim border_left As Variant
+    Dim border_right As Variant
+    Dim border_bottom As Variant
+    
+    Dim i, j As Integer
+        
+    Dim width As Integer
+    
+    width = 2
+    
+    For i = x_offset To x_offset + 10 + 31 Step 1
+    
+        If (ws.Cells(y_offset + 2, i) <> "") Then
+        
+           width = width + 1
+        
+        End If
+    
+    Next i
+        
+    ws.Range(ws.Cells(y_offset + 1, x_offset), ws.Cells(y_offset + 2 + ninzu, width)).Borders.LineStyle = xlContinuous
+        
+    Set border_top = ws.Range(ws.Cells(y_offset + 1, x_offset), ws.Cells(y_offset + 1, width)).Borders(xlEdgeTop)
+    border_top.LineStyle = xlContinuous
+    border_top.Weight = xlThick
+    
+    Set border_left = ws.Range(ws.Cells(y_offset + 1, x_offset), ws.Cells(y_offset + 2 + ninzu, x_offset)).Borders(xlEdgeLeft)
+    border_left.LineStyle = xlContinuous
+    border_left.Weight = xlThick
+    
+    Set border_right = ws.Range(ws.Cells(y_offset + 1, width), ws.Cells(y_offset + 1 + ninzu, width)).Borders(xlEdgeRight)
+    border_right.LineStyle = xlContinuous
+    border_right.Weight = xlThick
+    
+    Set border_bottom = ws.Range(ws.Cells(y_offset + 2 + ninzu, x_offset), ws.Cells(y_offset + 2 + ninzu, width)).Borders(xlEdgeBottom)
+    border_bottom.LineStyle = xlContinuous
+    border_bottom.Weight = xlThick
+    
+    border_bottom.LineStyle = xlContinuous
+    border_bottom.Weight = xlThick
+    
+    Set border_bottom = ws.Range(ws.Cells(y_offset + 1, x_offset), ws.Cells(y_offset + 1, width)).Borders(xlEdgeBottom)
+    border_bottom.LineStyle = xlContinuous
+    border_bottom.Weight = xlThick
+    
+    Set border_bottom = ws.Range(ws.Cells(y_offset + 2, x_offset), ws.Cells(y_offset + 2, width)).Borders(xlEdgeBottom)
+    border_bottom.LineStyle = xlContinuous
+    border_bottom.Weight = xlThick
+    
+    For i = 1 To ninzu Step 1
+    
+        If i Mod 5 = 0 Then
+           Set border_bottom = ws.Range(ws.Cells(y_offset + 2 + i, x_offset), ws.Cells(y_offset + 2 + i, width)).Borders(xlEdgeBottom)
+            border_bottom.LineStyle = xlContinuous
+            border_bottom.Weight = xlThick
+        
+        End If
+    
+    Next i
+    
+    Set border_right = ws.Range(ws.Cells(y_offset + 1, x_offset), ws.Cells(y_offset + 2 + ninzu, x_offset)).Borders(xlEdgeRight)
+    border_right.LineStyle = xlContinuous
+    border_right.Weight = xlThick
+    
+    Set border_right = ws.Range(ws.Cells(y_offset + 1, x_offset + 3), ws.Cells(y_offset + 2 + ninzu, x_offset + 3)).Borders(xlEdgeRight)
+    border_right.LineStyle = xlContinuous
+    border_right.Weight = xlThick
+    
+    Set border_right = ws.Range(ws.Cells(y_offset + 1, x_offset + 10), ws.Cells(y_offset + 2 + ninzu, x_offset + 3)).Borders(xlEdgeRight)
+    border_right.LineStyle = xlContinuous
+    border_right.Weight = xlThick
+    
+End Function
+
+Function setYoubi(ByVal ws As Worksheet)
+
+    ws.Cells(y_offset + 2, x_offset + 4) = "月"
+    ws.Cells(y_offset + 2, x_offset + 5) = "火"
+    ws.Cells(y_offset + 2, x_offset + 6) = "水"
+    ws.Cells(y_offset + 2, x_offset + 7) = "木"
+    ws.Cells(y_offset + 2, x_offset + 8) = "金"
+    ws.Cells(y_offset + 2, x_offset + 9) = "土"
+    ws.Cells(y_offset + 2, x_offset + 9).Font.Color = RGB(0, 0, 255)
+    ws.Cells(y_offset + 2, x_offset + 10) = "日"
+    ws.Cells(y_offset + 2, x_offset + 10).Font.Color = RGB(255, 0, 0)
+    
+    ws.Columns(x_offset + 4).hidden = True
+    ws.Columns(x_offset + 5).hidden = True
+    ws.Columns(x_offset + 6).hidden = True
+    ws.Columns(x_offset + 7).hidden = True
+    ws.Columns(x_offset + 8).hidden = True
+    ws.Columns(x_offset + 9).hidden = True
+    ws.Columns(x_offset + 10).hidden = True
+    
+End Function
+
+Function setNo(ByVal ws As Worksheet)
+
+    Dim i, j As Integer
+            
+    i = 1
+    
+    For j = (y_offset + 3) To (y_offset + 3) + ninzu - 1 Step 1
+        ws.Cells(j, x_offset) = i
+        i = i + 1
+    Next j
+    
+    i = 1
+    
+End Function
+
+Function setYoubiConditions(ByVal ws As Worksheet)
+
+   Dim i, j As Integer
+   
+   Dim range_condition As Range
+   
+   Set range_condition = ws.Range(ws.Cells(y_offset + 3, x_offset + 4), ws.Cells(y_offset + 3 + ninzu - 1, x_offset + (4 - 1) + 7))
+   
+   range_condition.Validation.Delete
+'    ws.Range("F5:L54").Validation.Delete
+      
+    range_condition.Validation.Add Type:=xlValidateList, Formula1:="終日,午前,午後"
+    range_condition.FormatConditions.Add Type:=xlCellValue, Operator:=xlEqual, Formula1:="終日"
+    range_condition.FormatConditions(1).Interior.Color = RGB(255, 255, 0) ' 黄色
+    range_condition.FormatConditions.Add Type:=xlCellValue, Operator:=xlEqual, Formula1:="午前"
+    range_condition.FormatConditions(2).Interior.Color = RGB(255, 192, 203) '　ピンク
+    range_condition.FormatConditions.Add Type:=xlCellValue, Operator:=xlEqual, Formula1:="午後"
+    range_condition.FormatConditions(3).Interior.Color = RGB(0, 255, 255) '　水色
+End Function
+Function setBikouConditions(ByVal ws As Worksheet)
+  
+    Dim range_condition As Range
+    
+    Set range_condition = ws.Range(ws.Cells(y_offset + 3, x_offset + 2), ws.Cells(y_offset + 3 + ninzu - 1, x_offset + 2))
+         
+    range_condition.Validation.Delete
+     
+    range_condition.Validation.Add Type:=xlValidateList, Formula1:="送迎,支給日調整"
+    
+End Function
+
+Function setGappi(ByVal ws As Worksheet)
+       
+    ws.Cells(y_offset, x_offset) = Left(ws.Name, 4)
+    ws.Cells(y_offset, x_offset + 1) = Right(ws.Name, 2)
+        
+End Function
+
+Function cellClear(ByVal ws As Worksheet)
+   ws.Cells.Clear
+   ws.Range("a1:aq56").HorizontalAlignment = xlCenter
+End Function
+
+Function setCalender(ByVal ws As Worksheet)
+
+    Dim i, j As Integer
+    Dim nen, tuki As Integer
+        
+    nen = Left(ws.Name, 4)
+    tuki = Right(ws.Name, 2)
+    
+    For i = 1 To 31 Step 1
+        
+        If IsDate(nen & "/" & Format(tuki, "00") & "/" & Format(i, "00")) Then
+            ws.Cells(y_offset + 1, x_offset + 10 + i) = i
+            ws.Cells(y_offset + 2, x_offset + 10 + i) = getYoubi(Weekday(DateSerial(nen, tuki, i)))
+            
+            If getYoubi(Weekday(DateSerial(nen, tuki, i))) = "土" Then
+                ws.Cells(y_offset + 2, x_offset + 10 + i).Font.Color = RGB(0, 0, 255)
+            End If
+            
+            If getYoubi(Weekday(DateSerial(nen, tuki, i))) = "日" Then
+                ws.Cells(y_offset + 2, x_offset + 10 + i).Font.Color = RGB(255, 0, 0)
+            End If
+                  
+        End If
+        
+        ws.Range(Cells(y_offset + 2, x_offset + 10 + i).Address(False, False)).ColumnWidth = 5
+        
+    Next i
+    
+'    ws.Range(Columns(x_offset + 11), Columns(x_offset + 10 + i)).ColumnWidth = 5
+       
+End Function
+Function freezePane(ByVal ws As Worksheet)
+
+    ws.Activate
+
+    ActiveWindow.FreezePanes = False
+
+    ws.Rows(y_offset + 3).Select
+    
+    ActiveWindow.FreezePanes = True
+
+End Function
+
+
+Function getYoubi(ByVal num As Integer) As String
+
+    Select Case num
+    
+        Case 1
+            getYoubi = "日"
+        Case 2
+            getYoubi = "月"
+        Case 3
+            getYoubi = "火"
+        Case 4
+            getYoubi = "水"
+        Case 5
+            getYoubi = "木"
+        Case 6
+            getYoubi = "金"
+        Case 7
+            getYoubi = "土"
+                        
+    End Select
+
+End Function
+
+Sub cellHidden()
+
+If (Columns("F:L").hidden) Then
+
+    Columns("F:L").hidden = False
+      
+Else
+    Columns("F:L").hidden = True
+End If
+
+End Sub
+
+Sub print_preview()
+
+    ActiveSheet.PageSetup.Zoom = 57
+    ActiveSheet.PageSetup.Orientation = xlLandscape
+    ActiveSheet.PageSetup.PrintArea = "$A$2:$AR$57"
+    ActiveSheet.PrintPreview
+ 
+End Sub
+
+Sub nameCopy()
+    
+    Dim index As Integer
+    Dim i, j As Integer
+    
+    index = ActiveSheet.index
+    
+    If index > 2 Then
+        
+        Worksheets(index - 1).Range("C7:C56").Copy ActiveSheet.Range("C7:C56")
+        Worksheets(index - 1).Range("F7:L56").Copy ActiveSheet.Range("F7:L56")
+        
+    End If
+
+End Sub
+
+Sub paint()
+
+    Dim i, j, k, day, keitai As Integer
+    Dim ninzu As Integer
+    Dim youbi As Variant
+                   
+    ninzu = 50
+                   
+    ' 曜日の取得
+    
+    Dim ary_keitai(1 To 7) As String
+    Dim ary_youbi(1 To 7) As String
+    
+    ary_youbi(1) = "月"
+    ary_youbi(2) = "火"
+    ary_youbi(3) = "水"
+    ary_youbi(4) = "木"
+    ary_youbi(5) = "金"
+    ary_youbi(6) = "土"
+    ary_youbi(7) = "日"
+    
+    For j = 1 To ninzu Step 1
+    
+        For keitai = 1 To 7 Step 1
+            ary_keitai(keitai) = ""
+        Next keitai
+    
+        For keitai = 1 To 7 Step 1
+            ary_keitai(keitai) = ActiveSheet.Cells(y_offset + 2 + j, x_offset + 3 + keitai)
+        Next keitai
+            
+        For day = 1 To 31 Step 1
+            ActiveSheet.Cells(y_offset + 2 + j, x_offset + 10 + day).Interior.pattern = xlNone
+            ActiveSheet.Cells(y_offset + 2 + j, x_offset + 10 + day) = ""
+        Next day
+
+        For day = 1 To 31 Step 1
+    
+         If ActiveSheet.Cells(y_offset + 2, x_offset + 10 + day) <> "" Then
+        
+            youbi = ActiveSheet.Cells(y_offset + 2, x_offset + 10 + day)
+      
+               For k = 1 To 7 Step 1
+        
+                    If youbi = ary_youbi(k) Then
+                        If (ary_keitai(k) <> "") Then
+                        
+                            If (ary_keitai(k) = "終日") Then  '黄色
+                                ActiveSheet.Cells(y_offset + 2 + j, x_offset + 10 + day).Interior.Color = RGB(255, 255, 0)
+                            End If
+                            
+                            If (ary_keitai(k) = "午前") Then  ' ピンク
+                                ActiveSheet.Cells(y_offset + 2 + j, x_offset + 10 + day).Interior.Color = RGB(255, 192, 203)
+                            End If
+                            
+                            If (ary_keitai(k) = "午後") Then  ' 水色
+                                ActiveSheet.Cells(y_offset + 2 + j, x_offset + 10 + day).Interior.Color = RGB(0, 255, 255)
+                            End If
+                            
+                            ActiveSheet.Cells(y_offset + 2 + j, x_offset + 10 + day).Interior.pattern = xlDown
+                            ActiveSheet.Cells(y_offset + 2 + j, x_offset + 10 + day) = ary_keitai(k)
+                        End If
+                    End If
+        
+                Next k
+    
+            End If
+        
+        Next day
+        
+    Next j ' 人数
+
+End Sub
+
+
+
