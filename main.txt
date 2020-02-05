@@ -1,8 +1,14 @@
 Option Explicit
 Option Base 1
-Public y_offset As Integer
-Public x_offset As Integer
-Public ninzu As Integer
+
+' 変数が初期化されない不具合を修正
+Public Const y_offset = 4
+Public Const x_offset = 2
+Public Const ninzu = 50
+
+' 休日のデータテーブルは50行目から
+Public Const h_y_offset = 50
+Public Const h_x_offset = 2
 
 Sub create_sheets()
 
@@ -10,11 +16,6 @@ Sub create_sheets()
     Dim require_sheets As Integer
     
     Dim worksheets_count As Integer
-    
-    y_offset = 4
-    x_offset = 2
-
-    ninzu = 50
     
     Application.DisplayAlerts = False
     
@@ -31,8 +32,6 @@ Sub create_sheets()
     If Worksheets.Count = 1 Then
         Worksheets.Add after:=Worksheets(Worksheets.Count)
     End If
-        
-'        Worksheets(2).Name = "Sheet2"
         
     While Worksheets.Count < require_sheets
         Worksheets(2).Copy after:=Worksheets(Worksheets.Count)
@@ -59,9 +58,12 @@ Sub create_sheets()
     Call setBorders(Worksheets(i))
     Call freezePane(Worksheets(i))
     Call setButtons(Worksheets(i))
+    Call setSundays(Worksheets(i))
     
 del_continue:
     Next i
+    
+    Call setPublicHoliday
     
     Call setHyperLinks
     
@@ -83,24 +85,24 @@ Function setButtons(ByVal ws As Worksheet)
 
     With ws.Buttons.Add(Range("Q2").Left, _
         Range("Q2").Top, _
-        Range("Q2:S2").width, _
+        Range("Q2:T2").width, _
         Range("Q2").Height)
         .OnAction = "nameCopy"
         .Characters.Text = "先月の氏名をコピー"
     End With
     
-    With ws.Buttons.Add(Range("U2").Left, _
-        Range("U2").Top, _
-        Range("U2:V2").width, _
-        Range("U2").Height)
+    With ws.Buttons.Add(Range("V2").Left, _
+        Range("V2").Top, _
+        Range("V2:W2").width, _
+        Range("V2").Height)
         .OnAction = "paint"
         .Characters.Text = "反映"
     End With
     
-    With ws.Buttons.Add(Range("X2").Left, _
-        Range("X2").Top, _
-        Range("X2:Y2").width, _
-        Range("X2").Height)
+    With ws.Buttons.Add(Range("Y2").Left, _
+        Range("Y2").Top, _
+        Range("Y2:Z2").width, _
+        Range("Y2").Height)
         .OnAction = "print_preview"
         .Characters.Text = "印刷"
     End With
@@ -171,10 +173,14 @@ Function setTitle(ByVal ws As Worksheet)
     ws.Cells(y_offset, x_offset + 2) = "出席管理票"
     ws.Range(ws.Cells(y_offset + 1, x_offset + 2), ws.Cells(y_offset + 1, x_offset + 3)).Merge
     ws.Cells(y_offset + 2, x_offset + 1) = "氏名"
+    ws.Cells(y_offset + 1, x_offset + 4) = "計画"
+    ws.Range(ws.Cells(y_offset + 1, x_offset + 4), ws.Cells(y_offset + 1, x_offset + 10)).Merge
     ws.Cells(y_offset + 2, x_offset + 2) = "備考/コメント"
     ws.Range(ws.Cells(y_offset + 2, x_offset + 2), ws.Cells(y_offset + 2, x_offset + 3)).Merge
     ws.Cells(y_offset + 2, x_offset) = "No."
     ws.Range(ws.Cells(y_offset, x_offset + 2), ws.Cells(y_offset, x_offset + 3)).Merge
+
+    ws.Columns(x_offset + 1).ColumnWidth = 13
 
 End Function
 
@@ -204,31 +210,31 @@ Function setBorders(ByVal ws As Worksheet)
     ws.Range(ws.Cells(y_offset + 1, x_offset), ws.Cells(y_offset + 2 + ninzu, width)).Borders.LineStyle = xlContinuous
         
     Set border_top = ws.Range(ws.Cells(y_offset + 1, x_offset), ws.Cells(y_offset + 1, width)).Borders(xlEdgeTop)
-    border_top.LineStyle = xlContinuous
-    border_top.Weight = xlThick
+        border_top.LineStyle = xlContinuous
+        border_top.Weight = xlThick
     
     Set border_left = ws.Range(ws.Cells(y_offset + 1, x_offset), ws.Cells(y_offset + 2 + ninzu, x_offset)).Borders(xlEdgeLeft)
-    border_left.LineStyle = xlContinuous
-    border_left.Weight = xlThick
+        border_left.LineStyle = xlContinuous
+        border_left.Weight = xlThick
     
     Set border_right = ws.Range(ws.Cells(y_offset + 1, width), ws.Cells(y_offset + 1 + ninzu, width)).Borders(xlEdgeRight)
-    border_right.LineStyle = xlContinuous
-    border_right.Weight = xlThick
+        border_right.LineStyle = xlContinuous
+        border_right.Weight = xlThick
     
     Set border_bottom = ws.Range(ws.Cells(y_offset + 2 + ninzu, x_offset), ws.Cells(y_offset + 2 + ninzu, width)).Borders(xlEdgeBottom)
-    border_bottom.LineStyle = xlContinuous
-    border_bottom.Weight = xlThick
+        border_bottom.LineStyle = xlContinuous
+        border_bottom.Weight = xlThick
     
-    border_bottom.LineStyle = xlContinuous
-    border_bottom.Weight = xlThick
+        border_bottom.LineStyle = xlContinuous
+        border_bottom.Weight = xlThick
     
     Set border_bottom = ws.Range(ws.Cells(y_offset + 1, x_offset), ws.Cells(y_offset + 1, width)).Borders(xlEdgeBottom)
-    border_bottom.LineStyle = xlContinuous
-    border_bottom.Weight = xlThick
+        border_bottom.LineStyle = xlContinuous
+        border_bottom.Weight = xlThick
     
     Set border_bottom = ws.Range(ws.Cells(y_offset + 2, x_offset), ws.Cells(y_offset + 2, width)).Borders(xlEdgeBottom)
-    border_bottom.LineStyle = xlContinuous
-    border_bottom.Weight = xlThick
+        border_bottom.LineStyle = xlContinuous
+        border_bottom.Weight = xlThick
     
     For i = 1 To ninzu Step 1
     
@@ -242,16 +248,16 @@ Function setBorders(ByVal ws As Worksheet)
     Next i
     
     Set border_right = ws.Range(ws.Cells(y_offset + 1, x_offset), ws.Cells(y_offset + 2 + ninzu, x_offset)).Borders(xlEdgeRight)
-    border_right.LineStyle = xlContinuous
-    border_right.Weight = xlThick
+        border_right.LineStyle = xlContinuous
+        border_right.Weight = xlThick
     
     Set border_right = ws.Range(ws.Cells(y_offset + 1, x_offset + 3), ws.Cells(y_offset + 2 + ninzu, x_offset + 3)).Borders(xlEdgeRight)
-    border_right.LineStyle = xlContinuous
-    border_right.Weight = xlThick
+        border_right.LineStyle = xlContinuous
+        border_right.Weight = xlThick
     
     Set border_right = ws.Range(ws.Cells(y_offset + 1, x_offset + 10), ws.Cells(y_offset + 2 + ninzu, x_offset + 3)).Borders(xlEdgeRight)
-    border_right.LineStyle = xlContinuous
-    border_right.Weight = xlThick
+        border_right.LineStyle = xlContinuous
+        border_right.Weight = xlThick
     
 End Function
 
@@ -300,8 +306,7 @@ Function setYoubiConditions(ByVal ws As Worksheet)
    
    Set range_condition = ws.Range(ws.Cells(y_offset + 3, x_offset + 4), ws.Cells(y_offset + 3 + ninzu - 1, x_offset + (4 - 1) + 7))
    
-   range_condition.Validation.Delete
-'    ws.Range("F5:L54").Validation.Delete
+    range_condition.Validation.Delete
       
     range_condition.Validation.Add Type:=xlValidateList, Formula1:="終日,午前,午後"
     range_condition.FormatConditions.Add Type:=xlCellValue, Operator:=xlEqual, Formula1:="終日"
@@ -362,9 +367,7 @@ Function setCalender(ByVal ws As Worksheet)
         ws.Range(Cells(y_offset + 2, x_offset + 10 + i).Address(False, False)).ColumnWidth = 5
         
     Next i
-    
-'    ws.Range(Columns(x_offset + 11), Columns(x_offset + 10 + i)).ColumnWidth = 5
-       
+           
 End Function
 Function freezePane(ByVal ws As Worksheet)
 
@@ -416,7 +419,7 @@ End Sub
 
 Sub print_preview()
 
-    ActiveSheet.PageSetup.Zoom = 57
+    ActiveSheet.PageSetup.Zoom = 45
     ActiveSheet.PageSetup.Orientation = xlLandscape
     ActiveSheet.PageSetup.PrintArea = "$A$2:$AR$57"
     ActiveSheet.PrintPreview
@@ -442,11 +445,8 @@ End Sub
 Sub paint()
 
     Dim i, j, k, day, keitai As Integer
-    Dim ninzu As Integer
     Dim youbi As Variant
-                   
-    ninzu = 50
-                   
+                                      
     ' 曜日の取得
     
     Dim ary_keitai(1 To 7) As String
@@ -460,6 +460,10 @@ Sub paint()
     ary_youbi(6) = "土"
     ary_youbi(7) = "日"
     
+    Debug.Print ninzu
+    Debug.Print y_offset
+    Debug.Print x_offset
+        
     For j = 1 To ninzu Step 1
     
         For keitai = 1 To 7 Step 1
@@ -471,8 +475,10 @@ Sub paint()
         Next keitai
             
         For day = 1 To 31 Step 1
-            ActiveSheet.Cells(y_offset + 2 + j, x_offset + 10 + day).Interior.pattern = xlNone
-            ActiveSheet.Cells(y_offset + 2 + j, x_offset + 10 + day) = ""
+            If (ActiveSheet.Cells(y_offset + 2, x_offset + 10 + day) <> "日") Then
+                ActiveSheet.Cells(y_offset + 2 + j, x_offset + 10 + day).Interior.pattern = xlNone
+                ActiveSheet.Cells(y_offset + 2 + j, x_offset + 10 + day) = ""
+            End If
         Next day
 
         For day = 1 To 31 Step 1
@@ -480,7 +486,7 @@ Sub paint()
          If ActiveSheet.Cells(y_offset + 2, x_offset + 10 + day) <> "" Then
         
             youbi = ActiveSheet.Cells(y_offset + 2, x_offset + 10 + day)
-      
+            
                For k = 1 To 7 Step 1
         
                     If youbi = ary_youbi(k) Then
@@ -498,8 +504,9 @@ Sub paint()
                                 ActiveSheet.Cells(y_offset + 2 + j, x_offset + 10 + day).Interior.Color = RGB(0, 255, 255)
                             End If
                             
-                            ActiveSheet.Cells(y_offset + 2 + j, x_offset + 10 + day).Interior.pattern = xlDown
-                            ActiveSheet.Cells(y_offset + 2 + j, x_offset + 10 + day) = ary_keitai(k)
+                            ' 変更 2020/02/01,網掛けなし
+                            'ActiveSheet.Cells(y_offset + 2 + j, x_offset + 10 + day).Interior.pattern = xlDown
+                            'ActiveSheet.Cells(y_offset + 2 + j, x_offset + 10 + day) = ary_keitai(k)
                         End If
                     End If
         
@@ -510,8 +517,74 @@ Sub paint()
         Next day
         
     Next j ' 人数
-
+    
+    Call setSundays(ActiveSheet)
+    Call setPublicHoliday
+    
 End Sub
+
+Function setSundays(ByVal ws As Worksheet)
+
+    Dim i, j As Integer
+    
+    For j = 1 To ninzu Step 1
+        
+        For i = 1 To 31 Step 1
+            If (ws.Cells(y_offset + 2, x_offset + 10 + i) = "日") Then
+                ws.Cells(y_offset + 2 + j, x_offset + 10 + i).Interior.Color = RGB(255, 0, 0)
+            End If
+        Next i
+    Next j
+    
+End Function
+
+Function setPublicHoliday()
+
+    Dim h_year, h_month, h_day, y_pos As Integer
+    Dim holiday As Variant
+    Dim sheetName As String
+    
+    Dim i, j, k As Integer
+        
+    holiday = Worksheets("初期設定").Cells(h_y_offset, h_x_offset)
+    y_pos = h_y_offset
+    
+    While holiday <> ""
+    
+        h_year = Left(holiday, 4)
+        h_month = Mid(holiday, 6, 2)
+        h_day = Right(holiday, 2)
+                
+        sheetName = h_year & h_month
+        
+        For i = 2 To Worksheets.Count
+        
+            If (Worksheets(i).Name = "初期設定") Then
+                GoTo continue
+            End If
+            
+            If (Worksheets(i).Name = sheetName) Then
+                       
+                For j = 1 To 31 Step 1
+                    If Format(Worksheets(i).Cells(y_offset + 1, x_offset + 10 + j), "00") = h_day Then
+                        Debug.Print h_day
+                        Worksheets(i).Range(Worksheets(i).Cells(y_offset + 3, x_offset + 10 + j), Worksheets(i).Cells(y_offset + 3 + ninzu - 1, x_offset + 10 + j)).Interior.Color = RGB(255, 0, 0)
+                    End If
+                Next j
+            
+            End If
+            
+continue:
+        Next i
+    
+        y_pos = y_pos + 1
+        holiday = Worksheets("初期設定").Cells(y_pos, h_x_offset)
+    
+    Wend
+    
+
+End Function
+
 
 
 
