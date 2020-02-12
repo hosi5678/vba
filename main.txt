@@ -10,6 +10,10 @@ Public Const ninzu = 50
 Public Const h_y_offset = 50
 Public Const h_x_offset = 2
 
+Public Const preview_zoom = 70
+Public Const preview_margin = 0.5
+
+
 Sub create_sheets()
 
     Dim i As Integer
@@ -59,6 +63,7 @@ Sub create_sheets()
     Call freezePane(Worksheets(i))
     Call setButtons(Worksheets(i))
     Call setSundays(Worksheets(i))
+    Call adjustColumnsWidth(Worksheets(i))
     
 del_continue:
     Next i
@@ -101,12 +106,19 @@ Function setButtons(ByVal ws As Worksheet)
     
     With ws.Buttons.Add(Range("Y2").Left, _
         Range("Y2").Top, _
-        Range("Y2:Z2").width, _
+        Range("Y2:AA2").width, _
         Range("Y2").Height)
-        .OnAction = "print_preview"
-        .Characters.Text = "印刷"
+        .OnAction = "print_preview_1"
+        .Characters.Text = "月の前半を印刷"
     End With
 
+    With ws.Buttons.Add(Range("AC2").Left, _
+        Range("AC2").Top, _
+        Range("AC2:AE2").width, _
+        Range("AC2").Height)
+        .OnAction = "print_preview_2"
+        .Characters.Text = "月の後半を印刷"
+    End With
 
 End Function
 
@@ -180,7 +192,15 @@ Function setTitle(ByVal ws As Worksheet)
     ws.Cells(y_offset + 2, x_offset) = "No."
     ws.Range(ws.Cells(y_offset, x_offset + 2), ws.Cells(y_offset, x_offset + 3)).Merge
 
-    ws.Columns(x_offset + 1).ColumnWidth = 13
+'    ws.Columns(x_offset + 1).ColumnWidth = 13
+
+End Function
+
+Function adjustColumnsWidth(ByVal ws As Worksheet)
+
+    ws.Columns(x_offset + 1).ColumnWidth = 13  ' C列 氏名
+    ws.Columns(x_offset + 2).ColumnWidth = 15
+    ws.Columns(x_offset + 3).ColumnWidth = 25
 
 End Function
 
@@ -408,21 +428,75 @@ End Function
 Sub cellHidden()
 
 If (Columns("F:L").hidden) Then
-
     Columns("F:L").hidden = False
-      
 Else
     Columns("F:L").hidden = True
 End If
 
 End Sub
 
-Sub print_preview()
+Sub print_preview_1()
 
-    ActiveSheet.PageSetup.Zoom = 45
+    If (Columns("F:L").hidden) Then
+    Else
+        Columns("F:L").hidden = True
+    End If
+
+    ActiveSheet.PageSetup.Zoom = preview_zoom
     ActiveSheet.PageSetup.Orientation = xlLandscape
-    ActiveSheet.PageSetup.PrintArea = "$A$2:$AR$57"
+    ActiveSheet.PageSetup.PrintArea = "$A$3:$AA$41"
+    ActiveSheet.PageSetup.TopMargin = Application.CentimetersToPoints(preview_margin)
+    ActiveSheet.PageSetup.BottomMargin = Application.CentimetersToPoints(preview_margin)
+    ActiveSheet.PageSetup.LeftMargin = Application.CentimetersToPoints(preview_margin)
+    ActiveSheet.PageSetup.RightMargin = Application.CentimetersToPoints(preview_margin)
+    ActiveSheet.PageSetup.HeaderMargin = Application.CentimetersToPoints(preview_margin)
+    ActiveSheet.PageSetup.FooterMargin = Application.CentimetersToPoints(preview_margin)
+    
+    ActiveSheet.Columns("M:AQ").ColumnWidth = 7
+    ActiveSheet.Rows("7:41").RowHeight = 23
+    
     ActiveSheet.PrintPreview
+    
+    ActiveSheet.Columns("M:AQ").ColumnWidth = 5
+    ActiveSheet.Rows("7:41").RowHeight = 14
+ 
+End Sub
+
+Sub print_preview_2()
+
+    If (Columns("F:L").hidden) Then
+    Else
+        Columns("F:L").hidden = True
+    End If
+
+    ActiveSheet.PageSetup.Zoom = preview_zoom
+    ActiveSheet.PageSetup.Orientation = xlLandscape
+    ActiveSheet.PageSetup.PrintArea = "$A$3:$AR$41"
+    
+    ActiveSheet.PageSetup.TopMargin = Application.CentimetersToPoints(preview_margin)
+    ActiveSheet.PageSetup.BottomMargin = Application.CentimetersToPoints(preview_margin)
+    ActiveSheet.PageSetup.LeftMargin = Application.CentimetersToPoints(preview_margin)
+    ActiveSheet.PageSetup.RightMargin = Application.CentimetersToPoints(preview_margin)
+    ActiveSheet.PageSetup.HeaderMargin = Application.CentimetersToPoints(preview_margin)
+    ActiveSheet.PageSetup.FooterMargin = Application.CentimetersToPoints(preview_margin)
+    
+    ActiveSheet.Columns("M:AQ").ColumnWidth = 7
+    ActiveSheet.Rows("7:41").RowHeight = 23
+        
+    If (Columns("M:AA").hidden) Then
+    Else
+        Columns("M:AA").hidden = True
+    End If
+        
+    ActiveSheet.PrintPreview
+    
+    ActiveSheet.Columns("M:AQ").ColumnWidth = 5
+    ActiveSheet.Rows("7:41").RowHeight = 14
+    
+    If (Columns("M:AA").hidden) Then
+        Columns("M:AA").hidden = False
+    Else
+    End If
  
 End Sub
 
